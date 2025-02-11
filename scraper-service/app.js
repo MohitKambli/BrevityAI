@@ -9,47 +9,47 @@ dotenv.config();
 const app = express();
 
 const PORT = process.env.PORT;
-const KAFKA_BROKER = process.env.KAFKA_BROKER || '192.168.200.6:9092';
-const KAFKA_TOPIC = process.env.KAFKA_TOPIC || 'scraped_articles';
-// const RABBITMQ_URL = process.env.RABBITMQ_URL;
-// const QUEUE_NAME = process.env.QUEUE_NAME;
+// const KAFKA_BROKER = process.env.KAFKA_BROKER || '192.168.200.6:9092';
+// const KAFKA_TOPIC = process.env.KAFKA_TOPIC || 'scraped_articles';
+const RABBITMQ_URL = process.env.RABBITMQ_URL;
+const QUEUE_NAME = process.env.QUEUE_NAME;
 
 // Initialize Kafka Producer
-const kafka = new Kafka({
-    clientId: 'scraper-service',
-    brokers: [KAFKA_BROKER],
-});
-const producer = kafka.producer();
+// const kafka = new Kafka({
+//     clientId: 'scraper-service',
+//     brokers: [KAFKA_BROKER],
+// });
+// const producer = kafka.producer();
 
 // Middleware to parse JSON
 app.use(express.json());
 
-// async function publishToQueue(message) {
-//     try {
-//         const connection = await amqplib.connect(RABBITMQ_URL);
-//         const channel = await connection.createChannel();
-//         await channel.assertQueue(QUEUE_NAME, { durable: true });
-//         channel.sendToQueue(QUEUE_NAME, Buffer.from(JSON.stringify(message)), { persistent: true });
-//         await channel.close();
-//         await connection.close();
-//     } catch (error) {
-//         console.error('❌ Error publishing to queue:', error);
-//     }
-// }
-
 async function publishToQueue(message) {
     try {
-        await producer.connect();
-        await producer.send({
-            topic: KAFKA_TOPIC,
-            messages: [{ value: JSON.stringify(message) }],
-        });
-        console.log('✅ Message published to Kafka:', message);
-        await producer.disconnect();
+        const connection = await amqplib.connect(RABBITMQ_URL);
+        const channel = await connection.createChannel();
+        await channel.assertQueue(QUEUE_NAME, { durable: true });
+        channel.sendToQueue(QUEUE_NAME, Buffer.from(JSON.stringify(message)), { persistent: true });
+        await channel.close();
+        await connection.close();
     } catch (error) {
-        console.error('❌ Error publishing to Kafka:', error);
+        console.error('❌ Error publishing to queue:', error);
     }
 }
+
+// async function publishToQueue(message) {
+//     try {
+//         await producer.connect();
+//         await producer.send({
+//             topic: KAFKA_TOPIC,
+//             messages: [{ value: JSON.stringify(message) }],
+//         });
+//         console.log('✅ Message published to Kafka:', message);
+//         await producer.disconnect();
+//     } catch (error) {
+//         console.error('❌ Error publishing to Kafka:', error);
+//     }
+// }
 
 // Endpoint to scrape Medium articles
 app.post('/scrape', async (req, res) => {
