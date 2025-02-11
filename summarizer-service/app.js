@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import amqplib from 'amqplib';
-import { Kafka } from 'kafkajs';
+// import { Kafka } from 'kafkajs';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DataAPIClient } from "@datastax/astra-db-ts";
 

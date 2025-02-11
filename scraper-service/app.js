@@ -1,8 +1,8 @@
-// scraper-service/index.ts
+// scraper-service/index.js
 import express from 'express';
 import puppeteer from 'puppeteer';
 import amqplib from 'amqplib';
-import { Kafka } from 'kafkajs';
+// import { Kafka } from 'kafkajs';
 import dotenv from 'dotenv';
 
 dotenv.config();
