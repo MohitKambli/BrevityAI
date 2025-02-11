@@ -60,8 +60,8 @@ app.post('/scrape', async (req, res) => {
 
     try {
         const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            executablePath: '/usr/bin/google-chrome-stable',
+            headless: 'new', // Ensure headless mode works well
+            args: ['--no-sandbox', '--disable-setuid-sandbox'], // Required for running on cloud environments
         });
         const page = await browser.newPage();
         await page.goto(url, { waitUntil: 'networkidle2' });
